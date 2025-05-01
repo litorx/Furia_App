@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="furia_black">#000000</color>
+    <color name="furia_yellow">#FFD700</color>
+    <color name="furia_white">#FFFFFF</color>
+    <color name="furia_gray">#1A1A1A</color>
+    
+    <color name="primary">@color/furia_black</color>
+    <color name="on_primary">@color/furia_white</color>
+    <color name="primary_container">@color/furia_gray</color>
+    <color name="on_primary_container">@color/furia_white</color>
+    <color name="secondary">@color/furia_yellow</color>
+    <color name="on_secondary">@color/furia_black</color>
+    <color name="secondary_container">@color/furia_yellow</color>
+    <color name="on_secondary_container">@color/furia_black</color>
+    <color name="tertiary">@color/furia_white</color>
+    <color name="on_tertiary">@color/furia_black</color>
+    <color name="tertiary_container">@color/furia_white</color>
+    <color name="on_tertiary_container">@color/furia_black</color>
+    <color name="error">#FFB4AB</color>
+    <color name="on_error">#690005</color>
+    <color name="error_container">#93000A</color>
+    <color name="on_error_container">#FFDAD6</color>
+    <color name="background">@color/furia_black</color>
+    <color name="on_background">@color/furia_white</color>
+    <color name="surface">@color/furia_black</color>
+    <color name="on_surface">@color/furia_white</color>
+    <color name="surface_variant">@color/furia_gray</color>
+    <color name="on_surface_variant">@color/furia_white</color>
+    <color name="outline">@color/furia_yellow</color>
+    <color name="outline_variant">#C2C8BC</color>
+    <color name="scrim">#000000</color>
+    <color name="inverse_surface">#2F3129</color>
+    <color name="inverse_on_surface">#F1F1EA</color>
+    <color name="inverse_primary">#A4D0A4</color>
+    <color name="surface_dim">#D8DBD0</color>
+    <color name="surface_bright">#F8FBF3</color>
+    <color name="surface_container_lowest">#FFFFFF</color>
+    <color name="surface_container_low">#F2F5ED</color>
+    <color name="surface_container">#ECEFE7</color>
+    <color name="surface_container_high">#E6E9E2</color>
+    <color name="surface_container_highest">#E1E4DC</color>
+</resources>

@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "633057436484",
+    "project_id": "furiafanapp",
+    "storage_bucket": "furiafanapp.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:633057436484:android:9e9d9bc7eb64ba18bfad11",
+        "android_client_info": {
+          "package_name": "com.furia.furiafanapp"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD8NVgHQfcJqosjYgT097TFTPIFP2gLfL8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

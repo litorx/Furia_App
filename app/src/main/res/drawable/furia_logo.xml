@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="200dp"
+    android:height="200dp"
+    android:viewportWidth="200"
+    android:viewportHeight="200">
+    
+    <!-- FURIA Text -->
+    <path
+        android:fillColor="@color/furia_yellow"
+        android:pathData="M20,50 L40,50 L40,150 L20,150 Z" />
+    <path
+        android:fillColor="@color/furia_yellow"
+        android:pathData="M50,50 L70,50 L70,150 L50,150 Z" />
+    <path
+        android:fillColor="@color/furia_yellow"
+        android:pathData="M80,50 L100,50 L100,150 L80,150 Z" />
+    <path
+        android:fillColor="@color/furia_yellow"
+        android:pathData="M110,50 L130,50 L130,150 L110,150 Z" />
+    <path
+        android:fillColor="@color/furia_yellow"
+        android:pathData="M140,50 L160,50 L160,150 L140,150 Z" />
+    
+    <!-- FURIA Logo Symbol -->
+    <path
+        android:fillColor="@color/furia_yellow"
+        android:pathData="M20,20 L180,20 L180,40 L20,40 Z" />
+    <path
+        android:fillColor="@color/furia_yellow"
+        android:pathData="M20,160 L180,160 L180,180 L20,180 Z" />
+    <path
+        android:fillColor="@color/furia_yellow"
+        android:pathData="M20,20 L40,20 L40,180 L20,180 Z" />
+    <path
+        android:fillColor="@color/furia_yellow"
+        android:pathData="M160,20 L180,20 L180,180 L160,180 Z" />
+</vector> 

@@ -1,0 +1,15 @@
+syntax = "proto3";
+option java_package = "com.furia.furiafanapp.datastore";
+option java_multiple_files = true;
+
+// Proto definition for caching match fixtures
+message Fixture {
+  string id = 1;
+  string home_team = 2;
+  string away_team = 3;
+  int64 start_time_millis = 4;
+}
+
+message Fixtures {
+  repeated Fixture fixtures = 1;
+}

@@ -1,0 +1,127 @@
+package com.furia.furiafanapp.ui.screens
+
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.GoogleAuthProvider
+import com.google.firebase.firestore.FieldValue
+import com.google.firebase.firestore.FirebaseFirestore
+import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.launch
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
+import javax.inject.Inject
+import android.util.Log
+
+@HiltViewModel
+class AuthViewModel @Inject constructor(
+    private val auth: FirebaseAuth,
+    private val firestore: FirebaseFirestore
+) : ViewModel() {
+
+    fun login(
+        email: String,
+        password: String,
+        onSuccess: () -> Unit,
+        onError: (String) -> Unit
+    ) {
+        auth.signInWithEmailAndPassword(email, password)
+            .addOnCompleteListener { task ->
+                if (task.isSuccessful) {
+                    onSuccess()
+                    // gamificação: 5 pontos por login (1x por dia)
+                    val uid = auth.currentUser?.uid ?: return@addOnCompleteListener
+                    val docRef = firestore.collection("users").document(uid)
+                    docRef.get()
+                        .addOnSuccessListener { snap ->
+                            val last = snap.getString("lastLoginDate") ?: ""
+                            val today = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date())
+                            Log.d("Gamification", "Login: lastLoginDate=$last, today=$today")
+                            if (last != today) {
+                                val updateMap = mapOf(
+                                    "points" to FieldValue.increment(5),
+                                    "lastLoginDate" to today
+                                )
+                                docRef.update(updateMap)
+                                    .addOnSuccessListener { Log.d("Gamification", "Login: awarded 5 FP") }
+                                    .addOnFailureListener { Log.e("Gamification", "Login: award failed", it) }
+                            } else {
+                                Log.d("Gamification", "Login: already awarded today")
+                            }
+                        }
+                        .addOnFailureListener { Log.e("Gamification", "Login: get lastLoginDate failed", it) }
+                } else onError(task.exception?.message ?: "Erro ao fazer login")
+            }
+    }
+
+    fun register(
+        email: String,
+        password: String,
+        name: String,
+        phone: String,
+        cpf: String?,
+        onSuccess: () -> Unit,
+        onError: (String) -> Unit
+    ) {
+        auth.createUserWithEmailAndPassword(email, password)
+            .addOnCompleteListener { task ->
+                if (task.isSuccessful) {
+                    val uid = auth.currentUser?.uid ?: return@addOnCompleteListener
+                    val userMap = mutableMapOf<String, Any>(
+                        "nickname" to name,
+                        "phone" to phone
+                    )
+                    userMap["email"] = email
+                    cpf?.let { userMap["cpf"] = it }
+                    firestore.collection("users").document(uid)
+                        .set(userMap)
+                        .addOnSuccessListener { onSuccess() }
+                        .addOnFailureListener { e -> onError(e.message ?: "Erro ao salvar perfil") }
+                } else onError(task.exception?.message ?: "Erro ao registrar")
+            }
+    }
+
+    fun saveProfile(
+        nickname: String,
+        instagram: String?,
+        twitch: String?,
+        x: String?
+    ) {
+        val uid = auth.currentUser?.uid ?: return
+        val profileMap = mutableMapOf<String, Any>(
+            "nickname" to nickname
+        )
+        instagram?.let { profileMap["instagram"] = it }
+        twitch?.let { profileMap["twitch"] = it }
+        x?.let { profileMap["x"] = it }
+        viewModelScope.launch {
+            firestore.collection("users").document(uid)
+                .update(profileMap)
+        }
+    }
+
+    fun loginWithGoogle(
+        idToken: String?,
+        onSuccess: () -> Unit,
+        onError: (String) -> Unit
+    ) {
+        if (idToken == null) {
+            onError("Google sign-in falhou")
+            return
+        }
+        val credential = GoogleAuthProvider.getCredential(idToken, null)
+        auth.signInWithCredential(credential)
+            .addOnCompleteListener { task ->
+                if (task.isSuccessful) onSuccess()
+                else onError(task.exception?.message ?: "Erro ao autenticar com Google")
+            }
+    }
+
+    /** Salva lista de jogos favoritos do usuário no Firestore */
+    fun saveFavoriteGames(games: Set<String>) {
+        val uid = auth.currentUser?.uid ?: return
+        firestore.collection("users").document(uid)
+            .update(mapOf("favorites" to games.toList()))
+    }
+}
