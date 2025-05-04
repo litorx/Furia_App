@@ -22,7 +22,6 @@ class ChatBotViewModel @Inject constructor(
     val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
 
     init {
-        // Adiciona a mensagem de boas-vindas
         _messages.value = listOf(chatRepository.welcomeMessage)
     }
 
@@ -30,24 +29,19 @@ class ChatBotViewModel @Inject constructor(
         if (text.isBlank()) return
         
         viewModelScope.launch {
-            // Adiciona a mensagem do usuário à lista
             val userMsg = ChatMessage(user = "user", text = text)
             val currentMessages = _messages.value.toMutableList()
             currentMessages.add(userMsg)
             _messages.value = currentMessages
             
-            // Indica que está carregando
             _isLoading.value = true
             
             try {
-                // Envia a mensagem para o repositório e obtém a resposta
                 val botResponse = chatRepository.sendMessage(text)
                 
-                // Adiciona a resposta do bot à lista
                 currentMessages.add(botResponse)
                 _messages.value = currentMessages
             } finally {
-                // Finaliza o carregamento
                 _isLoading.value = false
             }
         }

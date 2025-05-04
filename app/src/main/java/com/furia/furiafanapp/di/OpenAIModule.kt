@@ -10,9 +10,6 @@ import kotlinx.serialization.json.Json
 import javax.inject.Named
 import javax.inject.Singleton
 
-/**
- * Módulo Dagger para dependências relacionadas à OpenAI.
- */
 @Module
 @InstallIn(SingletonComponent::class)
 object OpenAIModule {

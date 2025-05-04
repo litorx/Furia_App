@@ -62,16 +62,12 @@ fun OnboardingScreen(
     authViewModel: AuthViewModel = hiltViewModel(),
     onOnboardingComplete: () -> Unit
 ) {
-    // Removendo a verificação automática de onboarding completed
-    // para garantir que o usuário passe por esta tela após o registro
-    
     var selectedGames by remember { mutableStateOf(setOf<String>()) }
     val pagerState = rememberPagerState(initialPage = 0) { games.size }
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
 
     Box(modifier = Modifier.fillMaxSize()) {
-        // Background wallpaper and overlay
         Image(
             painter = painterResource(id = R.drawable.wallpaper),
             contentDescription = null,
@@ -91,7 +87,6 @@ fun OnboardingScreen(
         ) {
             Spacer(modifier = Modifier.height(32.dp))
 
-            // FURIA bird logo
             Image(
                 painter = painterResource(id = R.drawable.logo_furiav_semtexto),
                 contentDescription = "FURIA Logo",
@@ -100,7 +95,6 @@ fun OnboardingScreen(
                     .padding(bottom = 16.dp)
             )
 
-            // Small dynamic welcome text
             Text(
                 text = stringResource(R.string.onboarding_subtitle),
                 style = MaterialTheme.typography.bodyMedium,
@@ -111,7 +105,6 @@ fun OnboardingScreen(
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            // Game selection with horizontal pager
             Card(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -213,7 +206,6 @@ fun GameSelectionItem(
                 .padding(horizontal = 16.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // Game icon
             Image(
                 painter = painterResource(id = game.icon),
                 contentDescription = game.name,
@@ -224,7 +216,6 @@ fun GameSelectionItem(
 
             Spacer(modifier = Modifier.width(16.dp))
 
-            // Game name
             Text(
                 text = game.name,
                 style = MaterialTheme.typography.titleMedium,
@@ -232,7 +223,6 @@ fun GameSelectionItem(
                 modifier = Modifier.weight(1f)
             )
 
-            // Selection indicator
             if (isSelected) {
                 Icon(
                     imageVector = Icons.Default.Check,

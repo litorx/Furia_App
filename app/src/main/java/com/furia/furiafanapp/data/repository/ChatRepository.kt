@@ -29,7 +29,6 @@ class ChatRepository @Inject constructor(
     @Named("openai") private val httpClient: HttpClient,
     private val json: Json
 ) {
-    // Informações sobre a FURIA para incluir no sistema prompt
     private val furiaInfo = """
         FURIA Esports é uma organização brasileira de esportes eletrônicos fundada em 2017 por Jaime "raizen" Pádua e André Akkari.
         
@@ -55,7 +54,6 @@ class ChatRepository @Inject constructor(
         O mascote da FURIA é uma pantera negra, e as cores oficiais são preto e amarelo/dourado.
     """.trimIndent()
     
-    // Instruções para o chatbot
     private val systemInstructions = """
         Você é o assistente oficial da FURIA Esports, especializado em tudo sobre a organização.
         Sempre responda como se fosse parte da equipe FURIA.
@@ -74,56 +72,41 @@ class ChatRepository @Inject constructor(
         $furiaInfo
     """.trimIndent()
 
-    // Inicializa a conversa com o prompt do sistema
     private val conversation = mutableListOf(
         mapOf("role" to "system", "content" to systemInstructions)
     )
 
-    // Mensagem de boas-vindas
     val welcomeMessage = ChatMessage(
         user = "assistant",
         text = "Olá! Sou o assistente oficial da FURIA. Como posso ajudar você hoje?"
     )
 
-    /**
-     * Envia uma mensagem para a API da OpenAI e retorna a resposta
-     */
     suspend fun sendMessage(text: String): ChatMessage {
         return withContext(Dispatchers.IO) {
-            // Adiciona a mensagem do usuário à conversa
             conversation.add(mapOf("role" to "user", "content" to text))
             
             try {
-
                 val body = buildJsonObject {
-
                     put("model", "gpt-3.5-turbo")
-
                     put("max_tokens", 300)
-
                     put("temperature", 0.7)
-
                     put("messages", json.encodeToJsonElement(conversation))
                 }
                 
-                // Envia a requisição para a API
                 val httpResponse: HttpResponse = httpClient.post("https://api.openai.com/v1/chat/completions") {
                     contentType(ContentType.Application.Json)
                     setBody(body)
                 }
                 
-                // Verifica o status da resposta
                 if (!httpResponse.status.isSuccess()) {
                     return@withContext handleErrorResponse(httpResponse)
                 }
                 
-                // Processa a resposta
                 val responseText = httpResponse.bodyAsText()
                 Log.d("ChatRepository", "OpenAI response: $responseText")
                 
                 val jsonObj = json.parseToJsonElement(responseText).jsonObject
                 
-                // Verifica se há um erro no corpo da resposta
                 if (jsonObj.containsKey("error")) {
                     val errorObj = jsonObj["error"]?.jsonObject
                     val errorType = errorObj?.get("type")?.jsonPrimitive?.content ?: "unknown_error"
@@ -133,19 +116,15 @@ class ChatRepository @Inject constructor(
                     return@withContext handleApiError(errorType, errorMessage)
                 }
                 
-                // Extrai o conteúdo da resposta
                 val content = jsonObj["choices"]
                     ?.jsonArray?.get(0)?.jsonObject
                     ?.get("message")?.jsonObject
                     ?.get("content")?.jsonPrimitive?.content
                     ?: "Desculpe, não consegui gerar uma resposta. Tente novamente mais tarde."
                 
-                // Adiciona a resposta à conversa
                 conversation.add(mapOf("role" to "assistant", "content" to content))
                 
-                // Limita o tamanho da conversa para economizar tokens
                 if (conversation.size > 10) {
-                    // Mantém o prompt do sistema e as 5 mensagens mais recentes
                     val systemPrompt = conversation.first()
                     conversation.clear()
                     conversation.add(systemPrompt)
@@ -160,16 +139,13 @@ class ChatRepository @Inject constructor(
         }
     }
     
-    /**
-     * Trata erros de resposta HTTP
-     */
     private fun handleErrorResponse(response: HttpResponse): ChatMessage {
         val errorMessage = when (response.status) {
             HttpStatusCode.Unauthorized -> 
                 "Erro de autenticação com a API. Verifique sua chave de API."
             
             HttpStatusCode.TooManyRequests -> 
-                "Limite de requisições excedido. Por favor, tente novamente mais tarde."
+                "O serviço de chat está temporariamente indisponível. Por favor, tente novamente em alguns minutos."
             
             HttpStatusCode.BadRequest ->
                 "Requisição inválida. Tente uma pergunta diferente."
@@ -186,9 +162,6 @@ class ChatRepository @Inject constructor(
         return ChatMessage(user = "assistant", text = errorMessage)
     }
     
-    /**
-     * Trata erros específicos da API da OpenAI
-     */
     private fun handleApiError(errorType: String, errorMessage: String): ChatMessage {
         val userFriendlyMessage = when {
             errorType.contains("rate_limit") || errorMessage.contains("rate limit") ->
@@ -210,9 +183,6 @@ class ChatRepository @Inject constructor(
         return ChatMessage(user = "assistant", text = userFriendlyMessage)
     }
     
-    /**
-     * Trata exceções gerais
-     */
     private fun handleException(exception: Exception): ChatMessage {
         val errorMessage = when (exception) {
             is java.net.UnknownHostException, 
@@ -230,9 +200,6 @@ class ChatRepository @Inject constructor(
         return ChatMessage(user = "assistant", text = errorMessage)
     }
     
-    /**
-     * Limpa a conversa atual, mantendo apenas o prompt do sistema
-     */
     fun clearConversation() {
         val systemPrompt = conversation.first()
         conversation.clear()

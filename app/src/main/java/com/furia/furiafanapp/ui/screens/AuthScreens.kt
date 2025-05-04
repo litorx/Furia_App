@@ -36,7 +36,6 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.delay
 
-// Helpers para formatação de campos e mapeamento de erros
 private fun String.onlyDigits() = filter { it.isDigit() }
 private fun formatCpf(input: String): String {
     val digits = input.onlyDigits().take(11)
@@ -61,7 +60,6 @@ private fun mapAuthError(error: String): String = when {
     else -> error
 }
 
-// máscara de telefone: (##) #####-#### usando VisualTransformation
 private class PhoneVisualTransformation : VisualTransformation {
     override fun filter(text: AnnotatedString): TransformedText {
         val digits = text.text.filter { it.isDigit() }.take(11)
@@ -106,26 +104,12 @@ fun LoginScreen(
     onLoginSuccess: () -> Unit,
     onNavigateToRegister: () -> Unit
 ) {
-    var email by remember { mutableStateOf("") }
-    var password by remember { mutableStateOf("") }
-    var errorMessage by remember { mutableStateOf<String?>(null) }
-    var isLoading by remember { mutableStateOf(false) }
-    // Animação do logo
-    var logoScale by remember { mutableStateOf(1f) }
-    val scale by animateFloatAsState(
-        targetValue = logoScale,
-        animationSpec = tween(durationMillis = 400)
-    )
-    LaunchedEffect(Unit) {
-        logoScale = 1.2f
-        delay(200)
-        logoScale = 1f
-    }
-
-    Box(
-        modifier = Modifier.fillMaxSize()
-    ) {
-        // Fundo: wallpaper e overlay preto
+    val email = authViewModel.email.collectAsState().value
+    val password = authViewModel.password.collectAsState().value
+    val isLoading = authViewModel.isLoading.collectAsState().value
+    val errorMessage = authViewModel.errorMessage.collectAsState().value
+    
+    Box(modifier = Modifier.fillMaxSize()) {
         Image(
             painter = painterResource(id = R.drawable.wallpaper),
             contentDescription = null,
@@ -135,76 +119,61 @@ fun LoginScreen(
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .background(Color.Black.copy(alpha = 0.5f))
+                .background(Color.Black.copy(alpha = 0.7f))
         )
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(16.dp),
-            verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.CenterHorizontally
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
         ) {
             Image(
-                painter = painterResource(id = R.drawable.logo_furiav_semtexto),
-                contentDescription = null,
-                modifier = Modifier.size(150.dp).scale(scale)
+                painter = painterResource(id = R.drawable.logo_furia),
+                contentDescription = "FURIA Logo",
+                modifier = Modifier
+                    .width(200.dp)
+                    .padding(bottom = 32.dp)
             )
-            Spacer(modifier = Modifier.height(16.dp))
-            Text(
-                "Furia Fan",
-                style = MaterialTheme.typography.headlineSmall,
-                color = Color.White
-            )
-            Spacer(modifier = Modifier.height(8.dp))
-            Text(
-                "Sua jornada começa aqui. Venha torcer com a gente!",
-                style = MaterialTheme.typography.bodySmall,
-                color = Color.White
-            )
-            Spacer(modifier = Modifier.height(16.dp))
-            TextField(
+            
+            OutlinedTextField(
                 value = email,
-                onValueChange = { email = it },
+                onValueChange = { authViewModel.updateEmail(it) },
+                label = { Text("Email", color = Color.White) },
                 leadingIcon = { Icon(Icons.Default.Email, contentDescription = null, tint = FuriaYellow) },
-                placeholder = { Text("Email", color = Color.White) },
                 singleLine = true,
-                textStyle = LocalTextStyle.current.copy(color = Color.White),
-                colors = TextFieldDefaults.textFieldColors(
-                    containerColor = Color.White.copy(alpha = 0.1f),
-                    cursorColor = FuriaYellow
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedBorderColor = FuriaYellow,
+                    unfocusedBorderColor = Color.White,
+                    focusedTextColor = Color.White,
+                    unfocusedTextColor = Color.White
                 ),
                 modifier = Modifier.fillMaxWidth()
             )
+            
             Spacer(modifier = Modifier.height(8.dp))
-            TextField(
+            
+            OutlinedTextField(
                 value = password,
-                onValueChange = { password = it },
+                onValueChange = { authViewModel.updatePassword(it) },
+                label = { Text("Senha", color = Color.White) },
                 leadingIcon = { Icon(Icons.Default.Lock, contentDescription = null, tint = FuriaYellow) },
-                placeholder = { Text("Senha", color = Color.White) },
-                singleLine = true,
                 visualTransformation = PasswordVisualTransformation(),
-                textStyle = LocalTextStyle.current.copy(color = Color.White),
-                colors = TextFieldDefaults.textFieldColors(
-                    containerColor = Color.White.copy(alpha = 0.1f),
-                    cursorColor = FuriaYellow
+                singleLine = true,
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedBorderColor = FuriaYellow,
+                    unfocusedBorderColor = Color.White,
+                    focusedTextColor = Color.White,
+                    unfocusedTextColor = Color.White
                 ),
                 modifier = Modifier.fillMaxWidth()
             )
-            errorMessage?.let { Text(text = it, color = FuriaYellow) }
+            
             Spacer(modifier = Modifier.height(16.dp))
+            
             Button(
-                onClick = {
-                    isLoading = true
-                    authViewModel.login(
-                        email = email,
-                        password = password,
-                        onSuccess = onLoginSuccess,
-                        onError = { error ->
-                            errorMessage = mapAuthError(error)
-                            isLoading = false
-                        }
-                    )
-                },
+                onClick = { authViewModel.login(onLoginSuccess) },
+                enabled = !isLoading && email.isNotBlank() && password.isNotBlank(),
                 colors = ButtonDefaults.buttonColors(
                     containerColor = FuriaYellow,
                     contentColor = FuriaBlack
@@ -221,9 +190,27 @@ fun LoginScreen(
                     Text("Entrar")
                 }
             }
+            
             Spacer(modifier = Modifier.height(8.dp))
-            TextButton(onClick = onNavigateToRegister) {
-                Text("Criar conta", color = FuriaYellow)
+            
+            TextButton(
+                onClick = onNavigateToRegister,
+                colors = ButtonDefaults.textButtonColors(
+                    contentColor = Color.White
+                )
+            ) {
+                Text("Não tem uma conta? Cadastre-se")
+            }
+            
+            errorMessage?.let {
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(
+                    text = it,
+                    color = Color.Red,
+                    style = MaterialTheme.typography.bodySmall,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.fillMaxWidth()
+                )
             }
         }
     }
@@ -236,180 +223,139 @@ fun RegisterScreen(
     onRegisterSuccess: () -> Unit,
     onBack: () -> Unit
 ) {
-    var email by remember { mutableStateOf("") }
-    var password by remember { mutableStateOf("") }
-    var confirmPassword by remember { mutableStateOf("") }
-    var name by remember { mutableStateOf("") }
-    var phone by remember { mutableStateOf("") }
-    var cpf by remember { mutableStateOf("") }
-    var errorMessage by remember { mutableStateOf<String?>(null) }
-    var isLoading by remember { mutableStateOf(false) }
-    // Animação do logo
-    var logoScale by remember { mutableStateOf(1f) }
-    val scale by animateFloatAsState(
-        targetValue = logoScale,
-        animationSpec = tween(durationMillis = 400)
-    )
-    LaunchedEffect(Unit) {
-        logoScale = 1.2f
-        delay(200)
-        logoScale = 1f
-    }
-
+    val email = authViewModel.email.collectAsState().value
+    val password = authViewModel.password.collectAsState().value
+    val confirmPassword = authViewModel.confirmPassword.collectAsState().value
+    val isLoading = authViewModel.isLoading.collectAsState().value
+    val errorMessage = authViewModel.errorMessage.collectAsState().value
+    
     Box(modifier = Modifier.fillMaxSize()) {
-        // Wallpaper de fundo
         Image(
             painter = painterResource(id = R.drawable.wallpaper),
             contentDescription = null,
             contentScale = ContentScale.Crop,
             modifier = Modifier.fillMaxSize()
         )
-        // Overlay escuro
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .background(Color.Black.copy(alpha = 0.5f))
+                .background(Color.Black.copy(alpha = 0.7f))
         )
-        // Botão Voltar no topo esquerdo
-        IconButton(
-            onClick = onBack,
-            modifier = Modifier
-                .align(Alignment.TopStart)
-                .padding(16.dp)
-        ) {
-            Icon(Icons.Default.ArrowBack, contentDescription = null, tint = FuriaYellow)
-        }
-        // Conteúdo centralizado
         Column(
             modifier = Modifier
-                .fillMaxWidth()
-                .align(Alignment.Center)
+                .fillMaxSize()
                 .padding(16.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            // Logo maior sem texto
-            Image(
-                painter = painterResource(id = R.drawable.logo_furiav_semtexto),
-                contentDescription = null,
+            Row(
                 modifier = Modifier
-                    .size(160.dp)
-                    .scale(scale)
-            )
-            Spacer(modifier = Modifier.height(12.dp))
-            // Texto criativo
-            Text(
-                "Junte-se à Furia e leve sua paixão ao máximo!",
-                style = MaterialTheme.typography.bodySmall,
-                color = Color.White
-            )
-            Spacer(modifier = Modifier.height(24.dp))
-            TextField(
-                value = name,
-                onValueChange = { name = it },
-                leadingIcon = { Icon(Icons.Default.Person, contentDescription = null, tint = FuriaYellow) },
-                placeholder = { Text("Nome", color = Color.White) },
-                singleLine = true,
-                textStyle = LocalTextStyle.current.copy(color = Color.White),
-                colors = TextFieldDefaults.textFieldColors(
-                    containerColor = Color.White.copy(alpha = 0.1f),
-                    cursorColor = FuriaYellow
-                ),
-                modifier = Modifier.fillMaxWidth()
-            )
-            Spacer(modifier = Modifier.height(8.dp))
-            TextField(
-                value = email,
-                onValueChange = { email = it },
-                leadingIcon = { Icon(Icons.Default.Email, contentDescription = null, tint = FuriaYellow) },
-                placeholder = { Text("Email", color = Color.White) },
-                singleLine = true,
-                textStyle = LocalTextStyle.current.copy(color = Color.White),
-                colors = TextFieldDefaults.textFieldColors(
-                    containerColor = Color.White.copy(alpha = 0.1f),
-                    cursorColor = FuriaYellow
-                ),
-                modifier = Modifier.fillMaxWidth()
-            )
-            Spacer(modifier = Modifier.height(8.dp))
-            TextField(
-                value = phone,
-                onValueChange = { phone = it.filter { it.isDigit() }.take(11) },
-                visualTransformation = PhoneVisualTransformation(),
-                leadingIcon = { Icon(Icons.Default.Person, contentDescription = null, tint = FuriaYellow) },
-                placeholder = { Text("Telefone", color = Color.White) },
-                singleLine = true,
-                textStyle = LocalTextStyle.current.copy(color = Color.White),
-                colors = TextFieldDefaults.textFieldColors(
-                    containerColor = Color.White.copy(alpha = 0.1f),
-                    cursorColor = FuriaYellow
-                ),
-                modifier = Modifier.fillMaxWidth()
-            )
-            Spacer(modifier = Modifier.height(8.dp))
-            TextField(
-                value = password,
-                onValueChange = { password = it },
-                leadingIcon = { Icon(Icons.Default.Lock, contentDescription = null, tint = FuriaYellow) },
-                placeholder = { Text("Senha", color = Color.White) },
-                singleLine = true,
-                visualTransformation = PasswordVisualTransformation(),
-                textStyle = LocalTextStyle.current.copy(color = Color.White),
-                colors = TextFieldDefaults.textFieldColors(
-                    containerColor = Color.White.copy(alpha = 0.1f),
-                    cursorColor = FuriaYellow
-                ),
-                modifier = Modifier.fillMaxWidth()
-            )
-            Spacer(modifier = Modifier.height(8.dp))
-            TextField(
-                value = confirmPassword,
-                onValueChange = { confirmPassword = it },
-                leadingIcon = { Icon(Icons.Default.Lock, contentDescription = null, tint = FuriaYellow) },
-                placeholder = { Text("Confirmar senha", color = Color.White) },
-                singleLine = true,
-                visualTransformation = PasswordVisualTransformation(),
-                textStyle = LocalTextStyle.current.copy(color = Color.White),
-                colors = TextFieldDefaults.textFieldColors(
-                    containerColor = Color.White.copy(alpha = 0.1f),
-                    cursorColor = FuriaYellow
-                ),
-                modifier = Modifier.fillMaxWidth()
-            )
-            Spacer(modifier = Modifier.height(8.dp))
-            TextField(
-                value = cpf,
-                onValueChange = { cpf = formatCpf(it) },
-                placeholder = { Text("CPF (opcional)", color = Color.White) },
-                singleLine = true,
-                textStyle = LocalTextStyle.current.copy(color = Color.White),
-                colors = TextFieldDefaults.textFieldColors(
-                    containerColor = Color.White.copy(alpha = 0.1f),
-                    cursorColor = FuriaYellow
-                ),
-                modifier = Modifier.fillMaxWidth()
-            )
-            errorMessage?.let { Text(text = it, color = FuriaYellow) }
-            Spacer(modifier = Modifier.height(16.dp))
-            Button(
-                onClick = {
-                    if (password != confirmPassword) {
-                        errorMessage = "As senhas não conferem"
-                        return@Button
-                    }
-                    isLoading = true
-                    authViewModel.register(
-                        email = email,
-                        password = password,
-                        name = name,
-                        phone = phone,
-                        cpf = cpf.ifBlank { null },
-                        onSuccess = onRegisterSuccess,
-                        onError = { error ->
-                            errorMessage = mapAuthError(error)
-                            isLoading = false
-                        }
+                    .fillMaxWidth()
+                    .padding(vertical = 16.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                IconButton(onClick = onBack) {
+                    Icon(
+                        Icons.Default.ArrowBack,
+                        contentDescription = "Voltar",
+                        tint = Color.White
                     )
+                }
+                Text(
+                    text = "Cadastro",
+                    style = MaterialTheme.typography.headlineSmall,
+                    color = Color.White,
+                    modifier = Modifier.weight(1f)
+                )
+            }
+            
+            Image(
+                painter = painterResource(id = R.drawable.logo_furia),
+                contentDescription = "FURIA Logo",
+                modifier = Modifier
+                    .width(150.dp)
+                    .padding(bottom = 24.dp)
+            )
+            
+            OutlinedTextField(
+                value = email,
+                onValueChange = { authViewModel.updateEmail(it) },
+                label = { Text("Email", color = Color.White) },
+                leadingIcon = { Icon(Icons.Default.Email, contentDescription = null, tint = FuriaYellow) },
+                singleLine = true,
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedBorderColor = FuriaYellow,
+                    unfocusedBorderColor = Color.White,
+                    focusedTextColor = Color.White,
+                    unfocusedTextColor = Color.White
+                ),
+                isError = email.isNotEmpty() && !Patterns.EMAIL_ADDRESS.matcher(email).matches(),
+                supportingText = {
+                    if (email.isNotEmpty() && !Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
+                        Text("Email inválido", color = Color.Red)
+                    }
                 },
+                modifier = Modifier.fillMaxWidth()
+            )
+            
+            Spacer(modifier = Modifier.height(8.dp))
+            
+            OutlinedTextField(
+                value = password,
+                onValueChange = { authViewModel.updatePassword(it) },
+                label = { Text("Senha", color = Color.White) },
+                leadingIcon = { Icon(Icons.Default.Lock, contentDescription = null, tint = FuriaYellow) },
+                visualTransformation = PasswordVisualTransformation(),
+                singleLine = true,
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedBorderColor = FuriaYellow,
+                    unfocusedBorderColor = Color.White,
+                    focusedTextColor = Color.White,
+                    unfocusedTextColor = Color.White
+                ),
+                isError = password.isNotEmpty() && password.length < 6,
+                supportingText = {
+                    if (password.isNotEmpty() && password.length < 6) {
+                        Text("Mínimo de 6 caracteres", color = Color.Red)
+                    }
+                },
+                modifier = Modifier.fillMaxWidth()
+            )
+            
+            Spacer(modifier = Modifier.height(8.dp))
+            
+            OutlinedTextField(
+                value = confirmPassword,
+                onValueChange = { authViewModel.updateConfirmPassword(it) },
+                label = { Text("Confirmar Senha", color = Color.White) },
+                leadingIcon = { Icon(Icons.Default.Lock, contentDescription = null, tint = FuriaYellow) },
+                visualTransformation = PasswordVisualTransformation(),
+                singleLine = true,
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedBorderColor = FuriaYellow,
+                    unfocusedBorderColor = Color.White,
+                    focusedTextColor = Color.White,
+                    unfocusedTextColor = Color.White
+                ),
+                isError = confirmPassword.isNotEmpty() && confirmPassword != password,
+                supportingText = {
+                    if (confirmPassword.isNotEmpty() && confirmPassword != password) {
+                        Text("As senhas não coincidem", color = Color.Red)
+                    }
+                },
+                modifier = Modifier.fillMaxWidth()
+            )
+            
+            Spacer(modifier = Modifier.height(16.dp))
+            
+            val isFormValid = email.isNotBlank() && 
+                             password.isNotBlank() && 
+                             password.length >= 6 &&
+                             password == confirmPassword &&
+                             Patterns.EMAIL_ADDRESS.matcher(email).matches()
+            
+            Button(
+                onClick = { authViewModel.register(onRegisterSuccess) },
+                enabled = !isLoading && isFormValid,
                 colors = ButtonDefaults.buttonColors(
                     containerColor = FuriaYellow,
                     contentColor = FuriaBlack
@@ -426,6 +372,17 @@ fun RegisterScreen(
                     Text("Cadastrar")
                 }
             }
+            
+            errorMessage?.let {
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(
+                    text = it,
+                    color = Color.Red,
+                    style = MaterialTheme.typography.bodySmall,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
         }
     }
 }
@@ -441,60 +398,46 @@ fun ProfileSetupScreen(
     var x by remember { mutableStateOf("") }
     var isLoading by remember { mutableStateOf(false) }
     var errorMessage by remember { mutableStateOf<String?>(null) }
-    // Animação do logo
-    var logoScale by remember { mutableStateOf(1f) }
-    val scale by animateFloatAsState(
-        targetValue = logoScale,
-        animationSpec = tween(durationMillis = 400)
-    )
-    LaunchedEffect(Unit) {
-        logoScale = 1.2f
-        delay(200)
-        logoScale = 1f
-    }
-
+    
     Box(modifier = Modifier.fillMaxSize()) {
-        // Wallpaper de fundo
         Image(
             painter = painterResource(id = R.drawable.wallpaper),
             contentDescription = null,
             contentScale = ContentScale.Crop,
             modifier = Modifier.fillMaxSize()
         )
-        // Overlay escuro
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .background(Color.Black.copy(alpha = 0.5f))
+                .background(Color.Black.copy(alpha = 0.7f))
         )
-        // Conteúdo centralizado
         Column(
             modifier = Modifier
-                .fillMaxWidth()
-                .align(Alignment.Center)
+                .fillMaxSize()
                 .padding(16.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            // Logo sem texto
-            Image(
-                painter = painterResource(id = R.drawable.logo_furiav_semtexto),
-                contentDescription = null,
-                modifier = Modifier
-                    .size(150.dp)
-                    .scale(scale)
-            )
-            Spacer(modifier = Modifier.height(12.dp))
-            // Texto criativo
             Text(
-                "Atualize seu perfil e mostre sua paixão pela Furia!",
-                style = MaterialTheme.typography.bodySmall,
-                color = Color.White
+                text = "Configure seu Perfil",
+                style = MaterialTheme.typography.headlineSmall,
+                color = Color.White,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 16.dp)
             )
-            Spacer(modifier = Modifier.height(24.dp))
+            
+            Image(
+                painter = painterResource(id = R.drawable.logo_furia),
+                contentDescription = "FURIA Logo",
+                modifier = Modifier
+                    .width(150.dp)
+                    .padding(bottom = 24.dp)
+            )
+            
             TextField(
+                leadingIcon = { Icon(Icons.Default.Person, contentDescription = null, tint = FuriaYellow) },
                 value = nickname,
                 onValueChange = { nickname = it },
-                leadingIcon = { Icon(Icons.Default.Person, contentDescription = null, tint = FuriaYellow) },
                 placeholder = { Text("Nickname", color = Color.White) },
                 singleLine = true,
                 textStyle = LocalTextStyle.current.copy(color = Color.White),
@@ -506,9 +449,9 @@ fun ProfileSetupScreen(
             )
             Spacer(modifier = Modifier.height(8.dp))
             TextField(
+                leadingIcon = { Icon(painter = painterResource(id = R.drawable.icon_instagram), contentDescription = null, tint = Color.Unspecified, modifier = Modifier.size(24.dp)) },
                 value = instagram,
                 onValueChange = { instagram = it },
-                leadingIcon = { Icon(painter = painterResource(id = R.drawable.icon_insta), contentDescription = null, tint = Color.Unspecified, modifier = Modifier.size(24.dp)) },
                 placeholder = { Text("Instagram (opcional)", color = Color.White) },
                 singleLine = true,
                 textStyle = LocalTextStyle.current.copy(color = Color.White),
@@ -539,7 +482,6 @@ fun ProfileSetupScreen(
                         isLoading = true
                         errorMessage = null
                         
-                        // Salvar o perfil
                         val uid = FirebaseAuth.getInstance().currentUser?.uid
                         if (uid != null) {
                             val profileMap = mutableMapOf<String, Any>(
@@ -548,11 +490,9 @@ fun ProfileSetupScreen(
                             instagram.takeIf { it.isNotBlank() }?.let { profileMap["instagram"] = it }
                             x.takeIf { it.isNotBlank() }?.let { profileMap["x"] = it }
                             
-                            // Usar Firestore diretamente para garantir que podemos verificar o sucesso
                             FirebaseFirestore.getInstance().collection("users").document(uid)
                                 .update(profileMap)
                                 .addOnSuccessListener {
-                                    // Perfil salvo com sucesso, navegar para a próxima tela
                                     isLoading = false
                                     onProfileSaved()
                                 }
@@ -584,7 +524,6 @@ fun ProfileSetupScreen(
                 }
             }
             
-            // Exibir mensagem de erro, se houver
             errorMessage?.let {
                 Spacer(modifier = Modifier.height(8.dp))
                 Text(

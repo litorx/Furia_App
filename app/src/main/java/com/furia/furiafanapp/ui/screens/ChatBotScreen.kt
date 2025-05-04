@@ -49,7 +49,6 @@ fun ChatBotScreen(
                     }
                 },
                 actions = {
-                    // Botão para limpar o histórico de conversa
                     IconButton(onClick = { viewModel.clearChat() }) {
                         Icon(
                             imageVector = Icons.Default.Delete,
@@ -108,8 +107,8 @@ fun ChatBotScreen(
                                 ) {
                                     Text(
                                         text = msg.text,
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                        modifier = Modifier.padding(12.dp)
+                                        modifier = Modifier.padding(16.dp),
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant
                                     )
                                 }
                             }
@@ -118,24 +117,22 @@ fun ChatBotScreen(
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .padding(vertical = 4.dp),
-                                horizontalArrangement = Arrangement.End,
-                                verticalAlignment = Alignment.Top
+                                horizontalArrangement = Arrangement.End
                             ) {
                                 Surface(
                                     shape = RoundedCornerShape(16.dp),
-                                    color = MaterialTheme.colorScheme.primary
+                                    color = FuriaYellow
                                 ) {
                                     Text(
                                         text = msg.text,
-                                        color = MaterialTheme.colorScheme.onPrimary,
-                                        modifier = Modifier.padding(12.dp)
+                                        modifier = Modifier.padding(16.dp),
+                                        color = Color.Black
                                     )
                                 }
                             }
                         }
                     }
                     
-                    // Indicador de carregamento
                     if (isLoading) {
                         item {
                             Row(

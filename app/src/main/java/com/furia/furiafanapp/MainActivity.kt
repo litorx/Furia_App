@@ -55,15 +55,11 @@ class MainActivity : ComponentActivity() {
         FirebaseFirestore.setLoggingEnabled(true)
         enableEdgeToEdge()
         
-        // Verificar se o usuário atual ainda existe no banco de dados
         val auth = FirebaseAuth.getInstance()
         if (auth.currentUser != null) {
             lifecycleScope.launch {
                 val userExists = userVerificationRepository.verifyCurrentUserOrLogout()
                 if (!userExists) {
-                    // Usuário foi excluído do banco de dados, mas ainda estava logado
-                    // O logout já foi realizado pelo método verifyCurrentUserOrLogout
-                    // Agora vamos reiniciar a atividade para mostrar a tela de login
                     recreate()
                     return@launch
                 }
@@ -76,7 +72,6 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = FuriaBlack
                 ) {
-                    // Carrega NavGraph em background e exibe o splash por cima para evitar flash branco
                     val navController = rememberNavController()
                     var showSplash by remember { mutableStateOf(true) }
                     Box(
@@ -90,44 +85,35 @@ class MainActivity : ComponentActivity() {
                             .collectAsState(initial = false)
                         val auth = FirebaseAuth.getInstance()
                         
-                        // Estado para controlar o destino inicial
                         var startDestination by remember { mutableStateOf<String?>(null) }
                         
-                        // Determinar o destino inicial com base no estado de autenticação e onboarding
-                        // Manter o splash visível até que o destino seja determinado
                         LaunchedEffect(auth.currentUser, onboardingCompleted) {
-                            if (auth.currentUser == null) {
-                                // Usuário não está logado
-                                startDestination = Screen.Login.route
+                            startDestination = if (auth.currentUser == null) {
+                                Screen.Login.route
                             } else {
-                                // Usuário está logado, verificar se tem perfil
-                                val uid = auth.currentUser?.uid ?: ""
-                                val firestore = FirebaseFirestore.getInstance()
+                                val uid = auth.currentUser!!.uid
                                 try {
+                                    val firestore = FirebaseFirestore.getInstance()
                                     val document = firestore.collection("users").document(uid).get().await()
                                     val hasNickname = document.getString("nickname") != null
                                     
-                                    startDestination = when {
+                                    when {
                                         !hasNickname -> Screen.ProfileSetup.route
                                         !onboardingCompleted -> Screen.Onboarding.route
                                         else -> Screen.Home.route
                                     }
                                 } catch (e: Exception) {
-                                    // Em caso de erro, direcionar para login
-                                    startDestination = Screen.Login.route
+                                    Screen.Login.route
                                 }
                             }
                         }
                         
-                        // Só mostrar o NavGraph quando o destino inicial estiver determinado e o splash terminar
                         if (startDestination != null && !showSplash) {
                             NavGraph(navController = navController, startDestination = startDestination!!)
                         }
                         
-                        // Sempre mostrar o splash enquanto o destino não for determinado
                         if (showSplash || startDestination == null) {
                             SplashScreen(onSplashFinished = { 
-                                // Só esconder o splash se o destino já estiver determinado
                                 if (startDestination != null) {
                                     showSplash = false
                                 }
@@ -201,12 +187,10 @@ fun SplashScreen(
     }
 }
 
-// Fases da animação do splash (simplificadas)
 private enum class SplashAnimationPhase {
-    INITIAL,   // Estado inicial
-    VISIBLE,   // Totalmente visível
-    FADE_OUT   // Desaparecendo suavemente
+    INITIAL,
+    VISIBLE,
+    FADE_OUT
 }
 
-// Curva de easing mais suave para a entrada
 private val EaseOutCirc = CubicBezierEasing(0.0f, 0.0f, 0.2f, 1.0f)
