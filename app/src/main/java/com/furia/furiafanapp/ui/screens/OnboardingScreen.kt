@@ -62,13 +62,9 @@ fun OnboardingScreen(
     authViewModel: AuthViewModel = hiltViewModel(),
     onOnboardingComplete: () -> Unit
 ) {
-    // Skip onboarding if already completed
-    val onboardingCompleted by LocalContext.current.onboardingPrefs.data
-        .map { prefs -> prefs[ONBOARDING_COMPLETED_KEY] ?: false }
-        .collectAsState(initial = false)
-    LaunchedEffect(onboardingCompleted) {
-        if (onboardingCompleted) onOnboardingComplete()
-    }
+    // Removendo a verificação automática de onboarding completed
+    // para garantir que o usuário passe por esta tela após o registro
+    
     var selectedGames by remember { mutableStateOf(setOf<String>()) }
     val pagerState = rememberPagerState(initialPage = 0) { games.size }
     val context = LocalContext.current

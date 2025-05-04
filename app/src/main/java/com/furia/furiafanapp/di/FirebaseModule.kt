@@ -4,6 +4,7 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.furia.furiafanapp.data.repository.ProfileRepository
 import com.furia.furiafanapp.data.repository.ProfileRepositoryImpl
+import com.furia.furiafanapp.data.repository.UserVerificationRepository
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -25,4 +26,11 @@ object FirebaseModule {
     @Singleton
     fun provideProfileRepository(firestore: FirebaseFirestore): ProfileRepository =
         ProfileRepositoryImpl(firestore)
+        
+    @Provides
+    @Singleton
+    fun provideUserVerificationRepository(
+        firestore: FirebaseFirestore,
+        auth: FirebaseAuth
+    ): UserVerificationRepository = UserVerificationRepository(firestore, auth)
 }

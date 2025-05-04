@@ -7,6 +7,9 @@ import com.google.firebase.auth.GoogleAuthProvider
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -14,11 +17,23 @@ import java.util.Locale
 import javax.inject.Inject
 import android.util.Log
 
+// Estado para o perfil do usuário
+sealed class ProfileState {
+    object Idle : ProfileState()
+    object Loading : ProfileState()
+    object Success : ProfileState()
+    data class Error(val message: String) : ProfileState()
+}
+
 @HiltViewModel
 class AuthViewModel @Inject constructor(
     private val auth: FirebaseAuth,
     private val firestore: FirebaseFirestore
 ) : ViewModel() {
+
+    // Estado observável para o perfil
+    private val _profileState = MutableStateFlow<ProfileState>(ProfileState.Idle)
+    val profileState: StateFlow<ProfileState> = _profileState.asStateFlow()
 
     fun login(
         email: String,
@@ -95,9 +110,22 @@ class AuthViewModel @Inject constructor(
         instagram?.let { profileMap["instagram"] = it }
         twitch?.let { profileMap["twitch"] = it }
         x?.let { profileMap["x"] = it }
+        
+        _profileState.value = ProfileState.Loading
+        
         viewModelScope.launch {
-            firestore.collection("users").document(uid)
-                .update(profileMap)
+            try {
+                firestore.collection("users").document(uid)
+                    .update(profileMap)
+                    .addOnSuccessListener {
+                        _profileState.value = ProfileState.Success
+                    }
+                    .addOnFailureListener { e ->
+                        _profileState.value = ProfileState.Error(e.message ?: "Erro ao salvar perfil")
+                    }
+            } catch (e: Exception) {
+                _profileState.value = ProfileState.Error(e.message ?: "Erro ao salvar perfil")
+            }
         }
     }
 

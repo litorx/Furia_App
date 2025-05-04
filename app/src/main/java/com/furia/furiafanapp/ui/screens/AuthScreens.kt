@@ -25,12 +25,15 @@ import androidx.compose.ui.text.input.OffsetMapping
 import androidx.compose.ui.text.input.TransformedText
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.furia.furiafanapp.R
 import com.furia.furiafanapp.ui.theme.FuriaBlack
 import com.furia.furiafanapp.ui.theme.FuriaYellow
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.delay
 
 // Helpers para formatação de campos e mapeamento de erros
@@ -105,7 +108,7 @@ fun LoginScreen(
 ) {
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
-    var error by remember { mutableStateOf<String?>(null) }
+    var errorMessage by remember { mutableStateOf<String?>(null) }
     var isLoading by remember { mutableStateOf(false) }
     // Animação do logo
     var logoScale by remember { mutableStateOf(1f) }
@@ -187,26 +190,21 @@ fun LoginScreen(
                 ),
                 modifier = Modifier.fillMaxWidth()
             )
-            error?.let { Text(text = it, color = FuriaYellow) }
+            errorMessage?.let { Text(text = it, color = FuriaYellow) }
             Spacer(modifier = Modifier.height(16.dp))
             Button(
                 onClick = {
-                    if (!isLoading) {
-                        error = null
-                        if (email.isBlank() || password.isBlank()) {
-                            error = "Preencha email e senha"
-                        } else if (!Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
-                            error = "Email inválido"
-                        } else {
-                            isLoading = true
-                            authViewModel.login(email, password, onLoginSuccess) { e ->
-                                error = mapAuthError(e)
-                                isLoading = false
-                            }
+                    isLoading = true
+                    authViewModel.login(
+                        email = email,
+                        password = password,
+                        onSuccess = onLoginSuccess,
+                        onError = { error ->
+                            errorMessage = mapAuthError(error)
+                            isLoading = false
                         }
-                    }
+                    )
                 },
-                enabled = !isLoading,
                 colors = ButtonDefaults.buttonColors(
                     containerColor = FuriaYellow,
                     contentColor = FuriaBlack
@@ -215,9 +213,9 @@ fun LoginScreen(
             ) {
                 if (isLoading) {
                     CircularProgressIndicator(
-                        modifier = Modifier.size(24.dp),
                         color = FuriaBlack,
-                        strokeWidth = 2.dp
+                        strokeWidth = 2.dp,
+                        modifier = Modifier.size(24.dp)
                     )
                 } else {
                     Text("Entrar")
@@ -238,12 +236,13 @@ fun RegisterScreen(
     onRegisterSuccess: () -> Unit,
     onBack: () -> Unit
 ) {
-    var name by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
-    var phone by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
+    var confirmPassword by remember { mutableStateOf("") }
+    var name by remember { mutableStateOf("") }
+    var phone by remember { mutableStateOf("") }
     var cpf by remember { mutableStateOf("") }
-    var error by remember { mutableStateOf<String?>(null) }
+    var errorMessage by remember { mutableStateOf<String?>(null) }
     var isLoading by remember { mutableStateOf(false) }
     // Animação do logo
     var logoScale by remember { mutableStateOf(1f) }
@@ -363,6 +362,21 @@ fun RegisterScreen(
             )
             Spacer(modifier = Modifier.height(8.dp))
             TextField(
+                value = confirmPassword,
+                onValueChange = { confirmPassword = it },
+                leadingIcon = { Icon(Icons.Default.Lock, contentDescription = null, tint = FuriaYellow) },
+                placeholder = { Text("Confirmar senha", color = Color.White) },
+                singleLine = true,
+                visualTransformation = PasswordVisualTransformation(),
+                textStyle = LocalTextStyle.current.copy(color = Color.White),
+                colors = TextFieldDefaults.textFieldColors(
+                    containerColor = Color.White.copy(alpha = 0.1f),
+                    cursorColor = FuriaYellow
+                ),
+                modifier = Modifier.fillMaxWidth()
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+            TextField(
                 value = cpf,
                 onValueChange = { cpf = formatCpf(it) },
                 placeholder = { Text("CPF (opcional)", color = Color.White) },
@@ -374,32 +388,28 @@ fun RegisterScreen(
                 ),
                 modifier = Modifier.fillMaxWidth()
             )
-            error?.let { Text(text = it, color = FuriaYellow) }
+            errorMessage?.let { Text(text = it, color = FuriaYellow) }
             Spacer(modifier = Modifier.height(16.dp))
             Button(
                 onClick = {
-                    if (!isLoading) {
-                        error = null
-                        if (name.isBlank() || email.isBlank() || phone.isBlank() || password.isBlank()) {
-                            error = "Preencha todos os campos obrigatórios"
-                        } else if (!Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
-                            error = "Email inválido"
-                        } else if (phone.onlyDigits().length < 10) {
-                            error = "Telefone inválido"
-                        } else if (cpf.isNotBlank() && cpf.onlyDigits().length != 11) {
-                            error = "CPF inválido"
-                        } else {
-                            isLoading = true
-                            val formattedPhone = phone
-                            val formattedCpf = if (cpf.isBlank()) null else formatCpf(cpf)
-                            authViewModel.register(email, password, name, formattedPhone, formattedCpf, onRegisterSuccess) { e ->
-                                error = mapAuthError(e)
-                                isLoading = false
-                            }
-                        }
+                    if (password != confirmPassword) {
+                        errorMessage = "As senhas não conferem"
+                        return@Button
                     }
+                    isLoading = true
+                    authViewModel.register(
+                        email = email,
+                        password = password,
+                        name = name,
+                        phone = phone,
+                        cpf = cpf.ifBlank { null },
+                        onSuccess = onRegisterSuccess,
+                        onError = { error ->
+                            errorMessage = mapAuthError(error)
+                            isLoading = false
+                        }
+                    )
                 },
-                enabled = !isLoading,
                 colors = ButtonDefaults.buttonColors(
                     containerColor = FuriaYellow,
                     contentColor = FuriaBlack
@@ -408,9 +418,9 @@ fun RegisterScreen(
             ) {
                 if (isLoading) {
                     CircularProgressIndicator(
-                        modifier = Modifier.size(24.dp),
                         color = FuriaBlack,
-                        strokeWidth = 2.dp
+                        strokeWidth = 2.dp,
+                        modifier = Modifier.size(24.dp)
                     )
                 } else {
                     Text("Cadastrar")
@@ -429,6 +439,8 @@ fun ProfileSetupScreen(
     var nickname by remember { mutableStateOf("") }
     var instagram by remember { mutableStateOf("") }
     var x by remember { mutableStateOf("") }
+    var isLoading by remember { mutableStateOf(false) }
+    var errorMessage by remember { mutableStateOf<String?>(null) }
     // Animação do logo
     var logoScale by remember { mutableStateOf(1f) }
     val scale by animateFloatAsState(
@@ -522,14 +534,66 @@ fun ProfileSetupScreen(
             )
             Spacer(modifier = Modifier.height(16.dp))
             Button(
-                onClick = { authViewModel.saveProfile(nickname, instagram.ifBlank { null }, null, x.ifBlank { null }); onProfileSaved() },
+                onClick = { 
+                    if (nickname.isNotBlank()) {
+                        isLoading = true
+                        errorMessage = null
+                        
+                        // Salvar o perfil
+                        val uid = FirebaseAuth.getInstance().currentUser?.uid
+                        if (uid != null) {
+                            val profileMap = mutableMapOf<String, Any>(
+                                "nickname" to nickname
+                            )
+                            instagram.takeIf { it.isNotBlank() }?.let { profileMap["instagram"] = it }
+                            x.takeIf { it.isNotBlank() }?.let { profileMap["x"] = it }
+                            
+                            // Usar Firestore diretamente para garantir que podemos verificar o sucesso
+                            FirebaseFirestore.getInstance().collection("users").document(uid)
+                                .update(profileMap)
+                                .addOnSuccessListener {
+                                    // Perfil salvo com sucesso, navegar para a próxima tela
+                                    isLoading = false
+                                    onProfileSaved()
+                                }
+                                .addOnFailureListener { e ->
+                                    isLoading = false
+                                    errorMessage = e.message ?: "Erro ao salvar perfil"
+                                }
+                        } else {
+                            isLoading = false
+                            errorMessage = "Usuário não autenticado"
+                        }
+                    }
+                },
                 colors = ButtonDefaults.buttonColors(
                     containerColor = FuriaYellow,
                     contentColor = FuriaBlack
                 ),
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
+                enabled = !isLoading && nickname.isNotBlank()
             ) {
-                Text("Salvar Perfil")
+                if (isLoading) {
+                    CircularProgressIndicator(
+                        color = FuriaBlack,
+                        strokeWidth = 2.dp,
+                        modifier = Modifier.size(24.dp)
+                    )
+                } else {
+                    Text("Salvar Perfil")
+                }
+            }
+            
+            // Exibir mensagem de erro, se houver
+            errorMessage?.let {
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(
+                    text = it,
+                    color = Color.Red,
+                    style = MaterialTheme.typography.bodySmall,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.fillMaxWidth()
+                )
             }
         }
     }

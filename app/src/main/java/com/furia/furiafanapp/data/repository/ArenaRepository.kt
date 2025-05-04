@@ -83,10 +83,30 @@ class ArenaRepositoryImpl @Inject constructor(
             .limit(20)
             .addSnapshotListener { snapshot, error ->
                 if (error != null) return@addSnapshotListener
-                val leaderboard = snapshot?.documents?.mapNotNull { doc ->
+                
+                val statsDocuments = snapshot?.documents?.mapNotNull { doc ->
                     doc.toObject(ArenaStats::class.java)
                 } ?: emptyList()
-                _leaderboard.value = leaderboard
+                
+                // Filtramos apenas os usuários que ainda existem no banco de dados
+                firestore.runTransaction { transaction ->
+                    val validStats = mutableListOf<ArenaStats>()
+                    
+                    for (stats in statsDocuments) {
+                        val userRef = firestore.collection("users").document(stats.userId)
+                        val userDoc = transaction.get(userRef)
+                        
+                        if (userDoc.exists()) {
+                            // Usuário existe, adicionar às estatísticas válidas
+                            validStats.add(stats)
+                        } else {
+                            // Usuário não existe mais, remover suas estatísticas
+                            firestore.collection("arenaStats").document(stats.userId).delete()
+                        }
+                    }
+                    
+                    _leaderboard.value = validStats
+                }
             }
     }
 

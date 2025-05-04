@@ -26,26 +26,50 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.compose.rememberNavController
+import com.furia.furiafanapp.data.repository.UserVerificationRepository
 import com.furia.furiafanapp.ui.navigation.NavGraph
 import com.furia.furiafanapp.ui.navigation.Screen
 import com.furia.furiafanapp.ui.theme.FuriaBlack
 import com.furia.furiafanapp.ui.theme.FuriaFanAppTheme
+import com.furia.furiafanapp.util.onboardingPrefs
+import com.furia.furiafanapp.util.ONBOARDING_COMPLETED_KEY
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import dagger.hilt.android.AndroidEntryPoint
+import javax.inject.Inject
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.map
-import com.furia.furiafanapp.util.onboardingPrefs
-import com.furia.furiafanapp.util.ONBOARDING_COMPLETED_KEY
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.tasks.await
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
+
+    @Inject
+    lateinit var userVerificationRepository: UserVerificationRepository
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         FirebaseFirestore.setLoggingEnabled(true)
         enableEdgeToEdge()
+        
+        // Verificar se o usuário atual ainda existe no banco de dados
+        val auth = FirebaseAuth.getInstance()
+        if (auth.currentUser != null) {
+            lifecycleScope.launch {
+                val userExists = userVerificationRepository.verifyCurrentUserOrLogout()
+                if (!userExists) {
+                    // Usuário foi excluído do banco de dados, mas ainda estava logado
+                    // O logout já foi realizado pelo método verifyCurrentUserOrLogout
+                    // Agora vamos reiniciar a atividade para mostrar a tela de login
+                    recreate()
+                    return@launch
+                }
+            }
+        }
+        
         setContent {
             FuriaFanAppTheme {
                 Surface(
@@ -65,14 +89,49 @@ class MainActivity : ComponentActivity() {
                             .map { it[ONBOARDING_COMPLETED_KEY] ?: false }
                             .collectAsState(initial = false)
                         val auth = FirebaseAuth.getInstance()
-                        val startDestination = when {
-                            auth.currentUser == null -> Screen.Login.route
-                            !onboardingCompleted -> Screen.Onboarding.route
-                            else -> Screen.Home.route
+                        
+                        // Estado para controlar o destino inicial
+                        var startDestination by remember { mutableStateOf<String?>(null) }
+                        
+                        // Determinar o destino inicial com base no estado de autenticação e onboarding
+                        // Manter o splash visível até que o destino seja determinado
+                        LaunchedEffect(auth.currentUser, onboardingCompleted) {
+                            if (auth.currentUser == null) {
+                                // Usuário não está logado
+                                startDestination = Screen.Login.route
+                            } else {
+                                // Usuário está logado, verificar se tem perfil
+                                val uid = auth.currentUser?.uid ?: ""
+                                val firestore = FirebaseFirestore.getInstance()
+                                try {
+                                    val document = firestore.collection("users").document(uid).get().await()
+                                    val hasNickname = document.getString("nickname") != null
+                                    
+                                    startDestination = when {
+                                        !hasNickname -> Screen.ProfileSetup.route
+                                        !onboardingCompleted -> Screen.Onboarding.route
+                                        else -> Screen.Home.route
+                                    }
+                                } catch (e: Exception) {
+                                    // Em caso de erro, direcionar para login
+                                    startDestination = Screen.Login.route
+                                }
+                            }
                         }
-                        NavGraph(navController = navController, startDestination = startDestination)
-                        if (showSplash) {
-                            SplashScreen(onSplashFinished = { showSplash = false })
+                        
+                        // Só mostrar o NavGraph quando o destino inicial estiver determinado e o splash terminar
+                        if (startDestination != null && !showSplash) {
+                            NavGraph(navController = navController, startDestination = startDestination!!)
+                        }
+                        
+                        // Sempre mostrar o splash enquanto o destino não for determinado
+                        if (showSplash || startDestination == null) {
+                            SplashScreen(onSplashFinished = { 
+                                // Só esconder o splash se o destino já estiver determinado
+                                if (startDestination != null) {
+                                    showSplash = false
+                                }
+                            })
                         }
                     }
                 }

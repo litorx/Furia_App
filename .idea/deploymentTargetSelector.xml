@@ -3,8 +3,8 @@
   <component name="deploymentTargetSelector">
     <selectionStates>
       <SelectionState runConfigName="app">
-        <option name="selectionMode" value="DROPDOWN" />
-        <DropdownSelection timestamp="2025-04-27T07:07:10.009057Z">
+        <option name="selectionMode" value="DIALOG" />
+        <DropdownSelection timestamp="2025-05-04T20:03:39.378348300Z">
           <Target type="DEFAULT_BOOT">
             <handle>
               <DeviceId pluginId="LocalEmulator" identifier="path=C:\Users\VitorX\.android\avd\Pixel_8_Pro_API_30.avd" />
@@ -15,12 +15,12 @@
           <targets>
             <Target type="DEFAULT_BOOT">
               <handle>
-                <DeviceId pluginId="LocalEmulator" identifier="path=C:\Users\VitorX\.android\avd\Pixel_8_Pro_API_30.avd" />
+                <DeviceId pluginId="PhysicalDevice" identifier="serial=RQCY2075DGZ" />
               </handle>
             </Target>
             <Target type="DEFAULT_BOOT">
               <handle>
-                <DeviceId pluginId="PhysicalDevice" identifier="serial=RQCY2075DGZ" />
+                <DeviceId pluginId="LocalEmulator" identifier="path=C:\Users\VitorX\.android\avd\Pixel_8_Pro_API_30.avd" />
               </handle>
             </Target>
           </targets>

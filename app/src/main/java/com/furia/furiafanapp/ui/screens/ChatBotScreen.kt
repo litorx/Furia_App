@@ -3,7 +3,9 @@ package com.furia.furiafanapp.ui.screens
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Send
@@ -24,6 +26,7 @@ import com.furia.furiafanapp.R
 import androidx.compose.foundation.Image
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.ui.res.painterResource
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -33,6 +36,7 @@ fun ChatBotScreen(
     viewModel: ChatBotViewModel = hiltViewModel()
 ) {
     val messages by viewModel.messages.collectAsState()
+    val isLoading by viewModel.isLoading.collectAsState()
     var text by remember { mutableStateOf("") }
 
     Scaffold(
@@ -42,6 +46,16 @@ fun ChatBotScreen(
                 navigationIcon = {
                     IconButton(onClick = { navController.popBackStack() }) {
                         Icon(Icons.Default.ArrowBack, contentDescription = "Voltar", tint = Color.White)
+                    }
+                },
+                actions = {
+                    // Botão para limpar o histórico de conversa
+                    IconButton(onClick = { viewModel.clearChat() }) {
+                        Icon(
+                            imageVector = Icons.Default.Delete,
+                            contentDescription = "Limpar conversa",
+                            tint = Color.White
+                        )
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = FuriaBlack)
@@ -69,7 +83,8 @@ fun ChatBotScreen(
                 LazyColumn(
                     modifier = Modifier
                         .weight(1f)
-                        .padding(8.dp)
+                        .padding(8.dp),
+                    state = rememberLazyListState()
                 ) {
                     items(messages) { msg ->
                         if (msg.user == "assistant") {
@@ -119,7 +134,49 @@ fun ChatBotScreen(
                             }
                         }
                     }
+                    
+                    // Indicador de carregamento
+                    if (isLoading) {
+                        item {
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(vertical = 4.dp),
+                                verticalAlignment = Alignment.Top
+                            ) {
+                                Image(
+                                    painter = painterResource(id = R.drawable.logo_furiav_semtexto),
+                                    contentDescription = "FURIA Logo",
+                                    modifier = Modifier
+                                        .size(32.dp)
+                                        .align(Alignment.CenterVertically)
+                                )
+                                Spacer(modifier = Modifier.width(8.dp))
+                                Surface(
+                                    shape = RoundedCornerShape(16.dp),
+                                    color = MaterialTheme.colorScheme.surfaceVariant
+                                ) {
+                                    Row(
+                                        modifier = Modifier.padding(16.dp),
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        Text(
+                                            text = "Pensando",
+                                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                                        )
+                                        Spacer(modifier = Modifier.width(8.dp))
+                                        CircularProgressIndicator(
+                                            modifier = Modifier.size(16.dp),
+                                            color = FuriaYellow,
+                                            strokeWidth = 2.dp
+                                        )
+                                    }
+                                }
+                            }
+                        }
+                    }
                 }
+                
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -135,14 +192,27 @@ fun ChatBotScreen(
                         modifier = Modifier.weight(1f),
                         colors = TextFieldDefaults.textFieldColors(
                             containerColor = FuriaYellow.copy(alpha = 0.1f),
-                            cursorColor = Color.White
-                        )
+                            cursorColor = Color.White,
+                            focusedIndicatorColor = FuriaYellow,
+                            unfocusedIndicatorColor = Color.Transparent
+                        ),
+                        singleLine = false,
+                        maxLines = 3
                     )
-                    IconButton(onClick = {
-                        viewModel.sendMessage(text)
-                        text = ""
-                    }) {
-                        Icon(Icons.Default.Send, contentDescription = "Enviar", tint = Color.White)
+                    IconButton(
+                        onClick = {
+                            if (text.isNotBlank() && !isLoading) {
+                                viewModel.sendMessage(text)
+                                text = ""
+                            }
+                        },
+                        enabled = text.isNotBlank() && !isLoading
+                    ) {
+                        Icon(
+                            Icons.Default.Send, 
+                            contentDescription = "Enviar", 
+                            tint = if (text.isNotBlank() && !isLoading) Color.White else Color.White.copy(alpha = 0.5f)
+                        )
                     }
                 }
             }

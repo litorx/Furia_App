@@ -14,6 +14,7 @@ import com.furia.furiafanapp.data.model.Tournament
 import com.furia.furiafanapp.data.model.UserProfile
 import com.furia.furiafanapp.data.repository.ArenaRepository
 import com.furia.furiafanapp.data.repository.MatchRepository
+import com.furia.furiafanapp.data.repository.UserVerificationRepository
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -32,6 +33,7 @@ import javax.inject.Inject
 class ArenaViewModel @Inject constructor(
     private val arenaRepository: ArenaRepository,
     private val matchRepository: MatchRepository,
+    private val userVerificationRepository: UserVerificationRepository,
     private val auth: FirebaseAuth,
     private val firestore: FirebaseFirestore
 ) : ViewModel() {
@@ -200,35 +202,33 @@ class ArenaViewModel @Inject constructor(
     private fun loadLeaderboard() {
         viewModelScope.launch {
             try {
-                // Carregar leaderboard
-                arenaRepository.getLeaderboard().collectLatest { leaderboard ->
-                    val userId = auth.currentUser?.uid
+                // Coletar estatísticas do repositório
+                arenaRepository.getLeaderboard().collectLatest { leaderboardStats ->
+                    // Filtrar apenas usuários que ainda existem no banco de dados
+                    val validStats = mutableListOf<ArenaStats>()
                     
-                    // Verificar se o usuário atual está no leaderboard
-                    val userInLeaderboard = leaderboard.find { it.userId == userId }
-                    
-                    // Se o usuário estiver no leaderboard, atualizar seus pontos com os pontos do perfil
-                    val updatedLeaderboard = if (userInLeaderboard != null && _userProfile.value != null) {
-                        leaderboard.map { stats ->
-                            if (stats.userId == userId) {
-                                // Atualizar os pontos do usuário no leaderboard com os pontos do perfil
-                                stats.copy(totalPointsWon = _userProfile.value?.points?.toInt() ?: stats.totalPointsWon)
-                            } else {
-                                stats
+                    for (stats in leaderboardStats) {
+                        if (userVerificationRepository.userExists(stats.userId)) {
+                            validStats.add(stats)
+                        } else {
+                            // Usuário não existe mais, limpar seus dados
+                            viewModelScope.launch {
+                                userVerificationRepository.cleanupDeletedUserData(stats.userId)
                             }
                         }
-                    } else {
-                        leaderboard
                     }
                     
-                    _leaderboard.value = updatedLeaderboard
+                    _leaderboard.value = validStats
                     
-                    // Atualizar as estatísticas do usuário atual se necessário
-                    if (userInLeaderboard != null && _userProfile.value != null) {
-                        _arenaStats.value = userInLeaderboard.copy(
-                            totalPointsWon = _userProfile.value?.points?.toInt() ?: userInLeaderboard.totalPointsWon
-                        )
+                    // Verificar se o usuário atual ainda existe
+                    if (auth.currentUser != null) {
+                        val userExists = userVerificationRepository.verifyCurrentUserOrLogout()
+                        if (!userExists) {
+                            _uiState.value = ArenaUiState.Error("Sua conta foi excluída. Faça login novamente.")
+                        }
                     }
+                    
+                    _uiState.value = ArenaUiState.Success
                 }
             } catch (e: Exception) {
                 _uiState.value = ArenaUiState.Error("Erro ao carregar leaderboard: ${e.message}")
