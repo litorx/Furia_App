@@ -1,4 +1,4 @@
-package com.furia.furiafanapp.ui.screens
+package com.furia.furiafanapp.ui.screens.Profile
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -8,10 +8,6 @@ import com.furia.furiafanapp.data.repository.ProfileRepository
 import com.furia.furiafanapp.data.repository.GamificationRepository
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.firestore.FieldValue
-import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.Locale
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow

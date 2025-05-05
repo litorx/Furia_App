@@ -1,13 +1,7 @@
-package com.furia.furiafanapp.ui.screens
+package com.furia.furiafanapp.ui.screens.Arena
 
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.EmojiEvents
@@ -18,22 +12,12 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
-import com.furia.furiafanapp.data.model.ArenaStats
-import com.furia.furiafanapp.data.model.Bet
-import com.furia.furiafanapp.data.model.BetStatus
-import com.furia.furiafanapp.data.model.Match
-import com.furia.furiafanapp.data.model.UserProfile
 import com.furia.furiafanapp.ui.theme.FuriaBlack
 import com.furia.furiafanapp.ui.theme.FuriaWhite
 import com.furia.furiafanapp.ui.theme.FuriaYellow
 import com.furia.furiafanapp.ui.components.UserProfileHeader
-import java.text.SimpleDateFormat
-import java.util.*
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

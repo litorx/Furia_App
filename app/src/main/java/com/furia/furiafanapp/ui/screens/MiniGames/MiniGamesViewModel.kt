@@ -1,4 +1,4 @@
-package com.furia.furiafanapp.ui.screens
+package com.furia.furiafanapp.ui.screens.MiniGames
 
 import android.content.Context
 import android.preference.PreferenceManager
@@ -20,7 +20,6 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import java.util.*
 import javax.inject.Inject
-import kotlin.random.Random
 
 enum class CurrentGame {
     NONE, QUIZ, MEMORY, CHALLENGES, WORD_SCRAMBLE

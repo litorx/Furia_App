@@ -1,4 +1,4 @@
-package com.furia.furiafanapp.ui.screens
+package com.furia.furiafanapp.ui.screens.Matches
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope

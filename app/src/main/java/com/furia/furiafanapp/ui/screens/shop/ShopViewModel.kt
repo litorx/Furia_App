@@ -1,4 +1,4 @@
-package com.furia.furiafanapp.ui.screens
+package com.furia.furiafanapp.ui.screens.shop
 
 import android.util.Log
 import androidx.lifecycle.ViewModel

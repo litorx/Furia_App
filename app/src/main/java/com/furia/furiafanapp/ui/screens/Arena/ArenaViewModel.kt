@@ -1,4 +1,4 @@
-package com.furia.furiafanapp.ui.screens
+package com.furia.furiafanapp.ui.screens.Arena
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -23,7 +23,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 import java.util.Date
@@ -224,7 +223,8 @@ class ArenaViewModel @Inject constructor(
                     if (auth.currentUser != null) {
                         val userExists = userVerificationRepository.verifyCurrentUserOrLogout()
                         if (!userExists) {
-                            _uiState.value = ArenaUiState.Error("Sua conta foi excluída. Faça login novamente.")
+                            _uiState.value =
+                                ArenaUiState.Error("Sua conta foi excluída. Faça login novamente.")
                         }
                     }
                     
@@ -414,7 +414,9 @@ class ArenaViewModel @Inject constructor(
                     // Limpar seleção
                     clearSelection()
                 } else {
-                    _uiState.value = ArenaUiState.Error(result.exceptionOrNull()?.message ?: "Erro ao fazer aposta")
+                    _uiState.value = ArenaUiState.Error(
+                        result.exceptionOrNull()?.message ?: "Erro ao fazer aposta"
+                    )
                 }
             } catch (e: Exception) {
                 _uiState.value = ArenaUiState.Error("Erro ao fazer aposta: ${e.message}")

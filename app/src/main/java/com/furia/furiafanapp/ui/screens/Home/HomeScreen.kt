@@ -1,10 +1,8 @@
-package com.furia.furiafanapp.ui.screens
+package com.furia.furiafanapp.ui.screens.Home
 
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -23,7 +21,6 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -44,13 +41,13 @@ import androidx.compose.material3.rememberDrawerState
 import com.google.firebase.auth.FirebaseAuth
 import com.furia.furiafanapp.ui.navigation.Screen
 import androidx.hilt.navigation.compose.hiltViewModel
-import coil.compose.AsyncImage
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.filled.EmojiEvents
 import androidx.compose.material.icons.filled.Person
-import androidx.compose.ui.draw.clip
-import com.furia.furiafanapp.ui.screens.ProfileViewModel
+import com.furia.furiafanapp.ui.screens.Profile.ProfileViewModel
 import com.furia.furiafanapp.data.model.UserProfile
+import com.furia.furiafanapp.ui.screens.Matches.ClosedMatchesScreen
+import com.furia.furiafanapp.ui.screens.Matches.LiveMatchesScreen
+import com.furia.furiafanapp.ui.screens.Matches.NextMatchesScreen
 import com.furia.furiafanapp.ui.theme.FuriaFanAppTheme
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)

@@ -4,16 +4,16 @@ import androidx.compose.runtime.Composable
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import com.furia.furiafanapp.ui.screens.HomeScreen
-import com.furia.furiafanapp.ui.screens.OnboardingScreen
-import com.furia.furiafanapp.ui.screens.LoginScreen
-import com.furia.furiafanapp.ui.screens.RegisterScreen
-import com.furia.furiafanapp.ui.screens.ProfileSetupScreen
-import com.furia.furiafanapp.ui.screens.ProfileScreen
-import com.furia.furiafanapp.ui.screens.ChatBotScreen
-import com.furia.furiafanapp.ui.screens.ArenaScreen
-import com.furia.furiafanapp.ui.screens.MiniGamesScreen
-import com.furia.furiafanapp.ui.screens.ShopScreen
+import com.furia.furiafanapp.ui.screens.Home.HomeScreen
+import com.furia.furiafanapp.ui.screens.Onboarding.OnboardingScreen
+import com.furia.furiafanapp.ui.screens.Auth.LoginScreen
+import com.furia.furiafanapp.ui.screens.Auth.RegisterScreen
+import com.furia.furiafanapp.ui.screens.Auth.ProfileSetupScreen
+import com.furia.furiafanapp.ui.screens.Profile.ProfileScreen
+import com.furia.furiafanapp.ui.screens.Chat.ChatBotScreen
+import com.furia.furiafanapp.ui.screens.Arena.ArenaScreen
+import com.furia.furiafanapp.ui.screens.MiniGames.MiniGamesScreen
+import com.furia.furiafanapp.ui.screens.shop.ShopScreen
 
 sealed class Screen(val route: String) {
     object Login : Screen("login")

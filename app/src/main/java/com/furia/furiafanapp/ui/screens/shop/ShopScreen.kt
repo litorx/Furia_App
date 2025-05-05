@@ -1,4 +1,4 @@
-package com.furia.furiafanapp.ui.screens
+package com.furia.furiafanapp.ui.screens.shop
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
@@ -25,7 +25,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import coil.compose.AsyncImage
@@ -33,14 +32,10 @@ import coil.request.ImageRequest
 import com.furia.furiafanapp.R
 import com.furia.furiafanapp.data.model.ShopCategory
 import com.furia.furiafanapp.data.model.ShopItem
-import com.furia.furiafanapp.data.model.ShopPurchase
-import com.furia.furiafanapp.data.model.PurchaseResult
-import com.furia.furiafanapp.data.model.UserProfile
 import com.furia.furiafanapp.ui.components.UserProfileHeader
 import com.furia.furiafanapp.ui.theme.FuriaBlack
 import com.furia.furiafanapp.ui.theme.FuriaWhite
 import com.furia.furiafanapp.ui.theme.FuriaYellow
-import java.text.NumberFormat
 import java.util.*
 
 @OptIn(ExperimentalMaterial3Api::class)

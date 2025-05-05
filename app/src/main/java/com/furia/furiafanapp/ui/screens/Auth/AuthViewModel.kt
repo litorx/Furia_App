@@ -1,4 +1,4 @@
-package com.furia.furiafanapp.ui.screens
+package com.furia.furiafanapp.ui.screens.Auth
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -213,7 +213,8 @@ class AuthViewModel @Inject constructor(
                         _profileState.value = ProfileState.Success
                     }
                     .addOnFailureListener { e ->
-                        _profileState.value = ProfileState.Error(e.message ?: "Erro ao salvar perfil")
+                        _profileState.value =
+                            ProfileState.Error(e.message ?: "Erro ao salvar perfil")
                     }
             } catch (e: Exception) {
                 _profileState.value = ProfileState.Error(e.message ?: "Erro ao salvar perfil")

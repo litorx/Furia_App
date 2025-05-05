@@ -1,4 +1,4 @@
-package com.furia.furiafanapp.ui.screens
+package com.furia.furiafanapp.ui.screens.Arena
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.*

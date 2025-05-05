@@ -1,4 +1,4 @@
-package com.furia.furiafanapp.ui.screens
+package com.furia.furiafanapp.ui.screens.Splash
 
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.Image

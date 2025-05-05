@@ -1,4 +1,4 @@
-package com.furia.furiafanapp.ui.screens
+package com.furia.furiafanapp.ui.screens.Onboarding
 
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
@@ -6,9 +6,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
@@ -17,7 +15,6 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.layout.ContentScale
@@ -32,11 +29,11 @@ import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.MutablePreferences
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.furia.furiafanapp.R
+import com.furia.furiafanapp.ui.screens.Auth.AuthViewModel
 import com.furia.furiafanapp.ui.theme.FuriaBlack
 import com.furia.furiafanapp.ui.theme.FuriaYellow
 import com.furia.furiafanapp.util.ONBOARDING_COMPLETED_KEY
 import com.furia.furiafanapp.util.onboardingPrefs
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 
 data class Game(

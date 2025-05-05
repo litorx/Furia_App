@@ -3,7 +3,7 @@
     androidx.compose.material3.ExperimentalMaterial3Api::class
 )
 
-package com.furia.furiafanapp.ui.screens
+package com.furia.furiafanapp.ui.screens.Settings
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*

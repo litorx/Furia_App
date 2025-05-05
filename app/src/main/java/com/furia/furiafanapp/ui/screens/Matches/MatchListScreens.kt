@@ -1,4 +1,4 @@
-package com.furia.furiafanapp.ui.screens
+package com.furia.furiafanapp.ui.screens.Matches
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -24,7 +24,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.compose.animation.*
 import androidx.compose.animation.core.*
 import androidx.hilt.navigation.compose.hiltViewModel
 import android.util.Log
@@ -33,6 +32,7 @@ import com.furia.furiafanapp.R
 import com.furia.furiafanapp.data.model.Match
 import com.furia.furiafanapp.data.model.MatchStatus
 import com.furia.furiafanapp.data.model.StreamPlatform
+import com.furia.furiafanapp.ui.screens.Chat.ChatScreen
 import com.furia.furiafanapp.ui.viewmodel.MatchViewModel
 import com.furia.furiafanapp.ui.viewmodel.MatchesUiState
 import com.furia.furiafanapp.utils.DateUtils

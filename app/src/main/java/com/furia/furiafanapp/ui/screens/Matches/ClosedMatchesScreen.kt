@@ -1,4 +1,4 @@
-package com.furia.furiafanapp.ui.screens
+package com.furia.furiafanapp.ui.screens.Matches
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -10,7 +10,6 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.furia.furiafanapp.ui.theme.FuriaWhite
 import com.furia.furiafanapp.ui.theme.FuriaYellow
-import com.furia.furiafanapp.data.model.Match
 import com.furia.furiafanapp.ui.viewmodels.MatchesViewModel
 
 @Composable

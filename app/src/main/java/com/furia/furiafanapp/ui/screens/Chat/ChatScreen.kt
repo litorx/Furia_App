@@ -1,4 +1,4 @@
-package com.furia.furiafanapp.ui.screens
+package com.furia.furiafanapp.ui.screens.Chat
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -25,13 +25,12 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import android.util.Log
 import com.furia.furiafanapp.R
-import com.furia.furiafanapp.data.model.ChatMessage
 import com.furia.furiafanapp.data.model.Match
 import com.furia.furiafanapp.ui.theme.FuriaBlack
 import com.furia.furiafanapp.ui.theme.FuriaWhite
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
-import com.furia.furiafanapp.ui.screens.ProfileViewModel
+import com.furia.furiafanapp.ui.screens.Profile.ProfileViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

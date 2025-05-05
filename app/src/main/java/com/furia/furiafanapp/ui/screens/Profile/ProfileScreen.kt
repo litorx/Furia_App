@@ -1,13 +1,10 @@
-package com.furia.furiafanapp.ui.screens
+package com.furia.furiafanapp.ui.screens.Profile
 
 import android.content.Intent
 import android.net.Uri
-import android.widget.Toast
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.rememberScrollState
@@ -18,9 +15,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Person
-import androidx.compose.material.icons.filled.EmojiEvents
 import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.Link
 import androidx.compose.runtime.*
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
@@ -42,7 +37,6 @@ import androidx.navigation.NavHostController
 import coil.compose.AsyncImage
 import com.furia.furiafanapp.R
 import com.furia.furiafanapp.data.model.UserProfile
-import com.furia.furiafanapp.ui.screens.ProfileViewModel
 import com.furia.furiafanapp.ui.theme.FuriaBlack
 import com.furia.furiafanapp.ui.theme.FuriaYellow
 import kotlinx.coroutines.launch
