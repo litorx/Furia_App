@@ -34,6 +34,73 @@ class AuthViewModel @Inject constructor(
     // Estado observável para o perfil
     private val _profileState = MutableStateFlow<ProfileState>(ProfileState.Idle)
     val profileState: StateFlow<ProfileState> = _profileState.asStateFlow()
+    
+    // Estados para os campos de formulário
+    private val _email = MutableStateFlow("")
+    val email: StateFlow<String> = _email.asStateFlow()
+    
+    private val _password = MutableStateFlow("")
+    val password: StateFlow<String> = _password.asStateFlow()
+    
+    private val _confirmPassword = MutableStateFlow("")
+    val confirmPassword: StateFlow<String> = _confirmPassword.asStateFlow()
+    
+    private val _isLoading = MutableStateFlow(false)
+    val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
+    
+    private val _errorMessage = MutableStateFlow<String?>(null)
+    val errorMessage: StateFlow<String?> = _errorMessage.asStateFlow()
+    
+    // Funções para atualizar os campos
+    fun updateEmail(value: String) {
+        _email.value = value
+    }
+    
+    fun updatePassword(value: String) {
+        _password.value = value
+    }
+    
+    fun updateConfirmPassword(value: String) {
+        _confirmPassword.value = value
+    }
+    
+    fun clearError() {
+        _errorMessage.value = null
+    }
+
+    fun login(onSuccess: () -> Unit) {
+        _isLoading.value = true
+        _errorMessage.value = null
+        
+        auth.signInWithEmailAndPassword(_email.value, _password.value)
+            .addOnCompleteListener { task ->
+                _isLoading.value = false
+                if (task.isSuccessful) {
+                    onSuccess()
+                    // gamificação: 5 pontos por login (1x por dia)
+                    val uid = auth.currentUser?.uid ?: return@addOnCompleteListener
+                    val docRef = firestore.collection("users").document(uid)
+                    docRef.get()
+                        .addOnSuccessListener { snap ->
+                            val last = snap.getString("lastLoginDate") ?: ""
+                            val today = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date())
+                            Log.d("Gamification", "Login: lastLoginDate=$last, today=$today")
+                            if (last != today) {
+                                val updateMap = mapOf(
+                                    "points" to FieldValue.increment(5),
+                                    "lastLoginDate" to today
+                                )
+                                docRef.update(updateMap)
+                                    .addOnSuccessListener { Log.d("Gamification", "Login: awarded 5 FP") }
+                                    .addOnFailureListener { Log.e("Gamification", "Login: award failed", it) }
+                            } else {
+                                Log.d("Gamification", "Login: already awarded today")
+                            }
+                        }
+                        .addOnFailureListener { Log.e("Gamification", "Login: get lastLoginDate failed", it) }
+                } else _errorMessage.value = task.exception?.message ?: "Erro ao fazer login"
+            }
+    }
 
     fun login(
         email: String,
@@ -67,6 +134,31 @@ class AuthViewModel @Inject constructor(
                         }
                         .addOnFailureListener { Log.e("Gamification", "Login: get lastLoginDate failed", it) }
                 } else onError(task.exception?.message ?: "Erro ao fazer login")
+            }
+    }
+
+    fun register(onSuccess: () -> Unit) {
+        if (_password.value != _confirmPassword.value) {
+            _errorMessage.value = "As senhas não coincidem"
+            return
+        }
+        
+        _isLoading.value = true
+        _errorMessage.value = null
+        
+        auth.createUserWithEmailAndPassword(_email.value, _password.value)
+            .addOnCompleteListener { task ->
+                _isLoading.value = false
+                if (task.isSuccessful) {
+                    val uid = auth.currentUser?.uid ?: return@addOnCompleteListener
+                    val userMap = mutableMapOf<String, Any>(
+                        "email" to _email.value
+                    )
+                    firestore.collection("users").document(uid)
+                        .set(userMap)
+                        .addOnSuccessListener { onSuccess() }
+                        .addOnFailureListener { e -> _errorMessage.value = e.message ?: "Erro ao salvar perfil" }
+                } else _errorMessage.value = task.exception?.message ?: "Erro ao registrar"
             }
     }
 

@@ -35,6 +35,14 @@ android {
         vectorDrawables {
             useSupportLibrary = true
         }
+        
+        // Carrega a chave API do Gemini do local.properties
+        val properties = com.android.build.gradle.internal.cxx.configure.gradleLocalProperties(rootDir)
+        val geminiApiKey = properties.getProperty("GEMINI_API_KEY") ?: ""
+        
+        // Configura a chave API como BuildConfig field
+        buildConfigField("String", "GEMINI_API_KEY", "\"$geminiApiKey\"")
+        
         // disponibiliza chave no BuildConfig
         buildConfigField(
             "String", 
@@ -80,6 +88,8 @@ dependencies {
     implementation("com.google.firebase:firebase-auth-ktx")
     implementation(libs.firebase.firestore.ktx)
     implementation(libs.firebase.dataconnect)
+    // Google AI SDK para Gemini - versão mais recente
+    implementation("com.google.ai.client.generativeai:generativeai:0.3.0")
     val composeBom = platform(libs.androidx.compose.bom)
     implementation(composeBom)
     androidTestImplementation(composeBom)

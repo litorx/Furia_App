@@ -449,7 +449,7 @@ fun ProfileSetupScreen(
             )
             Spacer(modifier = Modifier.height(8.dp))
             TextField(
-                leadingIcon = { Icon(painter = painterResource(id = R.drawable.icon_instagram), contentDescription = null, tint = Color.Unspecified, modifier = Modifier.size(24.dp)) },
+                leadingIcon = { Icon(painter = painterResource(id = R.drawable.icon_insta), contentDescription = null, tint = Color.Unspecified, modifier = Modifier.size(24.dp)) },
                 value = instagram,
                 onValueChange = { instagram = it },
                 placeholder = { Text("Instagram (opcional)", color = Color.White) },

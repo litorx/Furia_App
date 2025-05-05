@@ -3,7 +3,7 @@ package com.furia.furiafanapp.ui.screens
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.furia.furiafanapp.data.model.ChatMessage
-import com.furia.furiafanapp.data.repository.ChatRepository
+import com.furia.furiafanapp.data.repository.GeminiChatRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -13,7 +13,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class ChatBotViewModel @Inject constructor(
-    private val chatRepository: ChatRepository
+    private val chatRepository: GeminiChatRepository
 ) : ViewModel() {
     private val _messages = MutableStateFlow<List<ChatMessage>>(emptyList())
     val messages: StateFlow<List<ChatMessage>> = _messages.asStateFlow()

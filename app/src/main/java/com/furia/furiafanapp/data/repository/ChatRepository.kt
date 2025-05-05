@@ -33,7 +33,7 @@ class ChatRepository @Inject constructor(
         FURIA Esports é uma organização brasileira de esportes eletrônicos fundada em 2017 por Jaime "raizen" Pádua e André Akkari.
         
         Times atuais da FURIA (2025):
-        - CS2: art (capitão), yuurih, kscerato, chelo, drop, saffee (reserva)
+        - CS2: art (capitão), yuurih, kscerato, chelo, FalleN, saffee (reserva)
         - Valorant: Quick, Khalil, Mazin, Nozwerr, dgzin
         - League of Legends: Ranger, Goot, Envy, Brance, RedBert
         - Rainbow Six Siege: Fntzy, Stk, Pino, Miracle, Soulz1
