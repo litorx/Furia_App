@@ -2,7 +2,7 @@
 
 END-USER LICENSE AGREEMENT (EULA)
 
-Este Acordo de Licença (“Acordo”) é um contrato legal entre você (como indivíduo ou entidade) e Vitor Souza (“Licenciante”) para uso do software proprietário identificado como “Este Software” (“Software”).
+Este Acordo de Licença (“Acordo”) é um contrato legal entre você (como indivíduo ou entidade) e Vitor Souza (“Licenciante”) para uso do software proprietário identificado como “Furia App” (“Software”).
 
 1. CONCESSÃO DE LICENÇA  
    1.1 Sujeito aos termos e condições deste Acordo, o Licenciante concede a você uma licença não-exclusiva, intransferível e revogável para instalar e usar uma cópia do Software, exclusivamente para seus próprios fins internos de avaliação.  
@@ -29,7 +29,7 @@ Este Acordo de Licença (“Acordo”) é um contrato legal entre você (como in
    5.3 Após a rescisão, você deverá desinstalar e destruir todas as cópias do Software em sua posse.
 
 6. ISENÇÃO DE GARANTIA  
-   O Software é fornecido “NO ESTADO EM QUE SE ENCONTRA”, sem garantias expressas ou implícitas, incluindo, sem limitação, garantias de comercialização, adequação a um propósito específico ou não violação.
+   O Software é fornecido como prototipo, sem garantias expressas ou implícitas, incluindo, sem limitação, garantias de comercialização, adequação a um propósito específico ou não violação.
 
 7. LIMITAÇÃO DE RESPONSABILIDADE  
    Em nenhuma hipótese o Licenciante será responsável por quaisquer danos indiretos, especiais, incidentais ou consequenciais decorrentes do uso ou da impossibilidade de uso do Software, mesmo se avisado da possibilidade de tais danos.
